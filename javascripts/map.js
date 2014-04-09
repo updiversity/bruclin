@@ -114,7 +114,7 @@ for(var index in categories) {
 }
 
 var control = L.control.layers(baseLayers, overlayMaps, {
-	collapsed:false	
+	position:'topleft'	
 });
 
 control.addTo(map);

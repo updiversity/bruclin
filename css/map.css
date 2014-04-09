@@ -41,3 +41,9 @@ div.count-icon {
   line-height: 13px;
 }
 
+.leaflet-popup-content { 
+	height : 150px; 
+	overflow : auto; 
+	
+}
+
