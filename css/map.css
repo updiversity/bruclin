@@ -1,0 +1,43 @@
+/* Map
+---------------------------------------------*/
+
+.color-blue {
+	background: #0b2686;
+}
+    
+.color-green {
+	background: #006600;
+}
+
+.color-red {
+	background: #cc0000;
+}
+
+.color-grey {
+	background: #444444;
+}
+  
+        
+div.count-icon {
+    text-align:center;
+    vertical-align:middle;
+    border:1px solid #000;
+    border-radius: 20px;
+    line-height:30px;
+    font-family: verdana ;
+    color: white; 
+}
+
+.legend-i {
+	clear: both;
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border-radius: 100%;
+    opacity: .7;
+}
+
+.legend-label {
+  line-height: 13px;
+}
+
