@@ -1,4 +1,2 @@
-bruclin
-=======
-
-Bruclin Madriz
+updiversity.github.io
+=====================

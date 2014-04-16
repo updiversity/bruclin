@@ -3,15 +3,36 @@
 //	calendarSitiosUrl = 'https://www.google.com/calendar/feeds/ac3di8tnckg1dq0n935kk1gbos%40group.calendar.google.com/public/full?max-results=50';
 
 var	calendars = [
-	{"id" : 'https://www.google.com/calendar/feeds/7eq4jtb1bpjppvdu1tc91v3a4c%40group.calendar.google.com/public/full?max-results=50',
-	 "name": "Eventos",
-	 "colorcssclass": "color-blue"},
 	 {"id" : 'https://www.google.com/calendar/feeds/ac3di8tnckg1dq0n935kk1gbos%40group.calendar.google.com/public/full?max-results=50',
 	 "name": "Sitios",
 	 "colorcssclass": "color-red"},
+	{"id" : 'https://www.google.com/calendar/feeds/7eq4jtb1bpjppvdu1tc91v3a4c%40group.calendar.google.com/public/full?max-results=50',
+	 "name": "Eventos",
+	 "colorcssclass": "color-blue"},
 	 {"id" : 'https://www.google.com/calendar/feeds/6lagf1dq9g8e550h0e5qmh70ck%40group.calendar.google.com/public/full?max-results=50',
 	 "name": "Ruta Slow",
 	 "colorcssclass": "color-green"}] ;
+	 
+var indexLatLonArtistasBarrioMap = [
+	{"id":68 , "coordinates": [-3.73645,40.411091]},
+	{"id":69 , "coordinates": [-3.728126,40.413418]},
+	{"id":70 , "coordinates": [-3.72791,40.41177]},
+	{"id":71 , "coordinates": [-3.73265,40.41098]},
+	{"id":72 , "coordinates": [-3.72705,40.412273]},
+	{"id":73 , "coordinates": [-3.72744,40.41214]},
+	{"id":74 , "coordinates": [-3.72735,40.412449]},
+	{"id":75 , "coordinates": [-3.72788,40.412472]},
+	{"id":76 , "coordinates": [-3.72545,40.413132]},
+	{"id":77 , "coordinates": [-3.725898,40.412907]},
+	{"id":78 , "coordinates": [-3.73479,40.41037]},
+	{"id":79 , "coordinates": [-3.725755,40.412876]},
+	{"id":80 , "coordinates": [-3.72486,40.41288]},
+	{"id":81 , "coordinates": [-3.7305,40.4118]},
+	{"id":82 , "coordinates": [-3.72615,40.413238]},
+	{"id":83 , "coordinates": [-3.725755,40.412876]},
+];
+
+var iconColorClass="color-blue";
 
 var	tile_bruclinId = 'ighbal.rkjoflxr',
 	tile_transMadId = 'ighbal.6t6b6gvi',
@@ -49,57 +70,33 @@ var baseLayers = {
 
 //var controlLayers = L.control.layers(baseLayers).addTo(map);
 	
+var sidebar = L.control.sidebar('sidebar', {
+            closeButton: true,
+            position: 'left'
+        });
+        map.addControl(sidebar);
+        
+var visible = sidebar.isVisible();
+
 L.control.locate().addTo(map);
 	
-function mapData(myData){
-		
-	var bruclinEventos2014Layer = L.markerClusterGroup({
-			iconCreateFunction: function (cluster) {										
-				return L.divIcon({ className: "count-icon" , iconSize: [30, 30] });
-			},
-			maxClusterRadius:1
-			});
-
-	var bruclinEventosLayer = L.mapbox.featureLayer().setGeoJSON(myData);
-
-	bruclinEventosLayer.eachLayer(function(marker){
-		 marker.setIcon(new L.divIcon({
-	         className: 'count-icon',
-	         html: '<b>' + marker.feature.properties.id + '</b>',
-	         iconSize: [30,30]
-	     }));
-	     bruclinEventos2014Layer.addLayer(marker);
-	});
-		
-	map.fitBounds(bruclinEventosLayer.getBounds());
-	controlLayers.addOverlay(bruclinEventos2014Layer, "Eventos");
-	
-};
+map.on('click', function () {
+            sidebar.hide();
+       });
 
 var markers = new L.MarkerClusterGroup({
-	iconCreateFunction: function (cluster) {
+	iconCreateFunction: function (cluster) {		
+		var childMarkers = cluster.getAllChildMarkers();
 		
-		var overlaysCount = 0;
-		var category_index;
-		var i=0;
-		for (var val in overlayMaps_status) {
-			overlayMaps_status[val] ? overlaysCount++ : overlaysCount;
-			if (overlayMaps_status[val]) category_index = i;
-			i++;
-		};
-		
-		if (overlaysCount == 1) {
-			iconColorClass = calendars[category_index].colorcssclass;
-			return L.divIcon({ className: 'count-icon' + ' ' + iconColorClass , iconSize: [30, 30], html:'...' });
-		} else {
-			return L.icon({ iconUrl: 'icons/bruclinmadrid.svg', iconSize: [30, 30] });
-		}
-		
+		return L.divIcon({ 
+			className: 'count-icon' + ' ' + iconColorClass , 
+			iconSize: [30, 30], 
+			html: '<b>' + childMarkers[0].feature.properties.id + '</b>'});
 		},
-		maxClusterRadius:1
+		maxClusterRadius:1,
+		spiderfyOnMaxZoom: false,
+		zoomToBoundsOnClick: false
 	});
-	
-
 
 var categories = {};
 for (var cal in calendars) {
@@ -114,7 +111,7 @@ for(var index in categories) {
 }
 
 var control = L.control.layers(baseLayers, overlayMaps, {
-	position:'topleft'	
+	collapsed:false	
 });
 
 control.addTo(map);
@@ -141,18 +138,41 @@ map.on('overlayremove', function (a) {
 	};		
 });
 
+markers.on('clusterclick', function (a) {
+    var childMarkers = a.layer.getAllChildMarkers();
+    var info = '';
+    for (var x in childMarkers) {
+    	info = info +
+    		'<h2>' + childMarkers[x].feature.properties.title + '</h2>' +
+   			'<p>' + childMarkers[x].feature.properties.description + '</p>';
+    };
+	sidebar.setContent(info);
+	
+	if (visible == false) {
+		sidebar.show();
+	}; 
+});
+
 function main_execute(myData, cal) {
-                
+                                
         var markersCategoryLayer = L.mapbox.featureLayer().setGeoJSON(myData);
      
      	category_index = style_calendar(cal);
 		markersCategoryLayer.eachLayer(function(marker){
+			marker.feature.properties.id = get_marker_id(marker.feature.geometry.coordinates) ;
 			icon = new L.divIcon({
-		         className: 'count-icon' + ' ' + cal.colorcssclass,
+		         className: 'count-icon' + ' ' + iconColorClass,
 		         html: '<b>' + marker.feature.properties.id + '</b>',
 		         iconSize: [30,30],
 		    });
 			marker.setIcon(icon);
+			marker.on('click', function () {
+				this.closePopup();
+				sidebar.setContent(format_marker_info(this));
+            	if (visible == false) {
+					sidebar.show();
+				}; 
+        	});	
 			markers.addLayer(marker);
 			markers_category[category_index].push(marker);
 		});
@@ -162,10 +182,31 @@ function main_execute(myData, cal) {
 }
 
 function style_calendar(cal) {
-	//alert ("<li><i class='legend-i" + " " + cal.colorcssclass + "'></i>" + cal.name+"</li>");
 	return "<i class='legend-i" + " " + cal.colorcssclass + "'></i>"  + cal.name;
 }
-//load_calendar(calendarEventosUrl,mapData);
+
+function get_marker_id(latlon) {
+	var id = JSON.search(indexLatLonArtistasBarrioMap,"//*/*"
+            		+ "[coordinates[1] =" + latlon[0] + "]"
+            		+ "[coordinates[2] =" + latlon[1]  + "]"
+            		+ "/id"           		
+					);
+	if (id.length == 0) {
+		var newId = new Number(JSON.search(indexLatLonArtistasBarrioMap,"//*[last()]/id")) + 1 ;
+		indexLatLonArtistasBarrioMap.push({"id":newId, "coordinates": [latlon[0],latlon[1]]});
+	} else {
+		var newId = id[0];
+	}
+	return newId;			
+}
+
+function format_marker_info(marker) {
+ 	var info = 
+ 		'<h2>' + this.feature.properties.title + '</h2>' +
+    	'<p>' + this.feature.properties.description + '</p>';
+    	
+	return info;
+}
 
 for (var cal in calendars) {
 	load_calendar(calendars[cal],main_execute);
