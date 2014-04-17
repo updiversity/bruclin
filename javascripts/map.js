@@ -142,9 +142,7 @@ markers.on('clusterclick', function (a) {
     var childMarkers = a.layer.getAllChildMarkers();
     var info = '';
     for (var x in childMarkers) {
-    	info = info +
-    		'<h2>' + childMarkers[x].feature.properties.title + '</h2>' +
-   			'<p>' + childMarkers[x].feature.properties.description + '</p>';
+    	info = info + format_marker_info(childMarkers[x]);
     };
 	sidebar.setContent(info);
 	
@@ -154,6 +152,8 @@ markers.on('clusterclick', function (a) {
 });
 
 function main_execute(myData, cal) {
+                                
+        //alert(JSON.stringify(myData));
                                 
         var markersCategoryLayer = L.mapbox.featureLayer().setGeoJSON(myData);
      
@@ -201,9 +201,18 @@ function get_marker_id(latlon) {
 }
 
 function format_marker_info(marker) {
- 	var info = 
- 		'<h2>' + this.feature.properties.title + '</h2>' +
-    	'<p>' + this.feature.properties.description + '</p>';
+    	
+    var startTime = DateFormat.format.date(marker.feature.properties.agenda.startTime,"D, HH:mm");
+    var endTime = DateFormat.format.date(marker.feature.properties.agenda.endTime, "D, HH:mm");
+    	
+    var info =
+      '<table class="tg"><tr>'
+      + ' <th class="tg-0ki0">&gt;' + startTime + '<br>&nbsp; ' + endTime + '&lt;</th>'
+	  +	'<th class="tg-031e">' 
+	  + '<p><b>' +  marker.feature.properties.title + '</b><p>'
+	  + '<p>' + marker.feature.properties.description + '<p>'
+	  + '</th>'
+      + '</tr></table>';
     	
 	return info;
 }
