@@ -107,10 +107,6 @@ var visible = sidebar.isVisible();
 
 L.control.locate().addTo(map);
 	
-map.on('click', function () {
-            sidebar.hide();
-       });
-
 var markers = new L.MarkerClusterGroup({
 	iconCreateFunction: function (cluster) {		
 		var childMarkers = cluster.getAllChildMarkers();
@@ -147,6 +143,11 @@ map.addLayer(markers);
 for (var row in control._layers) {
     leaflet_meta[L.Util.stamp(control._layers[row].layer)] = control._layers[row].name;
 }
+
+map.on('click', function () {
+            sidebar.hide();
+       });
+
 map.on('overlayadd', function (a) {
     markers.clearLayers();
   	sidebar.hide();

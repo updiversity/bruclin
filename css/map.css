@@ -33,26 +33,12 @@ div.count-icon {
     color: white; 
 }
 
-.legend-i {
-	clear: both;
-    display: inline-block;
-    width: 13px;
-    height: 13px;
-    border-radius: 100%;
-    opacity: .7;
-}
-
-.legend-label {
-  line-height: 13px;
-}
-
 #sidebar {
 
    background-image:url("../icons/bruclinmadrid.svg");
    background-repeat: no-repeat;
    background-position: left bottom;
-   background-size:120px 120px;
+   background-size:100px 100px;
+   z-index: 0;
 
 };
-   
-}

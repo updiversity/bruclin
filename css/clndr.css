@@ -98,18 +98,21 @@ p {
 }
 .cal2 .clndr .clndr-grid {
   text-align: center;
-  border: 1px solid #000;
   display: inline-block;
+  width: 100%;
+  border: 1px solid #000
 }
 .cal2 .clndr .clndr-grid .header-day {
   float: left;
-  width: 50px;
+  display: inline-block;
+  width: 14.2857%;
   height: 25px;
   background: #a52626;
 }
 .cal2 .clndr .clndr-grid .day {
   float: left;
-  width: 50px;
+  display: inline-block;
+  width: 14.2857%;
   height: 25px;
   background:  #ce3030;
 }
@@ -136,8 +139,8 @@ p {
 .cal2 .clndr .clndr-grid .empty,
 .cal2 .clndr .clndr-grid .adjacent-month {
   float: left;
-  width: 50px;
-  height: 50px;
+  width: 14.2857%;
+  height: 25px;
   background: #ddd;
 }
 
