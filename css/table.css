@@ -2,6 +2,7 @@
 	border-collapse:collapse;
 	border-spacing:0;
 	text-align: left;
+	color: black;
 
 	}
 .tg td{
@@ -26,9 +27,12 @@
 	word-break:normal;
 	border-top-width:0px;
 	border-bottom-width:0px;
+	text-align:justify;
+	vertical-align:top; 
 	}
 .tg .tg-0ki0{
-	color:#9a0000;
-	width:30%;
+	color:#a52626;
+	width:20%;
 	vertical-align:top;
+	font-weight:bold;
 	}

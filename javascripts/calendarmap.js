@@ -43,6 +43,7 @@ function load_calendar(cal, callback) {
                     coordinates: []
                 },
                 properties: {
+                	type: cal.name
                 }                
             };
                         

@@ -51,6 +51,33 @@ var categories = {},
     random_category_index = '';
     overlayMaps_status = {};
 
+moment.lang('es');
+    
+var eventCalendars = $('.cal2').clndr({
+		template: $('#template-calendar').html(),
+		multiDayEvents: {
+			startDate: 'startDate', // here we tell clndr that the `start` and `end` fields
+			endDate: 'endDate'      // are where it will find the date information
+		},
+		lengthOfTime: {
+      		days: 7,
+      		interval: 7
+    	},
+    	clickEvents: {
+		    click: function(target) {
+		    	if ($(target.element).hasClass('event')) {
+		    		$(target.element).siblings().removeClass('clicked');
+    				$(target.element).addClass('clicked');
+		    	}
+		      $('.event-listing').html( format_events_info(target.events, target.date) );
+    		}
+  		},
+  		constraints: {
+  			startDate:moment(),
+  			endDate:moment()
+  		}
+    });
+
 //load google shared data
 //load_spreadsheet(id_spreadsheet, mapData);
 
@@ -100,7 +127,7 @@ var markers = new L.MarkerClusterGroup({
 
 var categories = {};
 for (var cal in calendars) {
-	var categories_index = style_calendar(calendars[cal]);
+	var categories_index = calendars[cal].name;
 	categories[categories_index] = new L.layerGroup().addTo(map);
 };
     
@@ -122,6 +149,7 @@ for (var row in control._layers) {
 }
 map.on('overlayadd', function (a) {
     markers.clearLayers();
+  	sidebar.hide();
 	var category_index = leaflet_meta[L.Util.stamp(a.layer)];
 	overlayMaps_status[category_index]=true;
 	for (cat in categories) {
@@ -131,6 +159,7 @@ map.on('overlayadd', function (a) {
 
 map.on('overlayremove', function (a) {
 	markers.clearLayers();
+	sidebar.hide();
 	var category_index = leaflet_meta[L.Util.stamp(a.layer)];
 	overlayMaps_status[category_index]=false;
 	for (cat in categories) {
@@ -140,12 +169,8 @@ map.on('overlayremove', function (a) {
 
 markers.on('clusterclick', function (a) {
     var childMarkers = a.layer.getAllChildMarkers();
-    var info = '';
-    for (var x in childMarkers) {
-    	info = info + format_marker_info(childMarkers[x]);
-    };
-	sidebar.setContent(info);
-	
+	showEvents(childMarkers);
+		
 	if (visible == false) {
 		sidebar.show();
 	}; 
@@ -157,7 +182,7 @@ function main_execute(myData, cal) {
                                 
         var markersCategoryLayer = L.mapbox.featureLayer().setGeoJSON(myData);
      
-     	category_index = style_calendar(cal);
+     	category_index = cal.name;
 		markersCategoryLayer.eachLayer(function(marker){
 			marker.feature.properties.id = get_marker_id(marker.feature.geometry.coordinates) ;
 			icon = new L.divIcon({
@@ -168,7 +193,7 @@ function main_execute(myData, cal) {
 			marker.setIcon(icon);
 			marker.on('click', function () {
 				this.closePopup();
-				sidebar.setContent(format_marker_info(this));
+				showEvents(this);
             	if (visible == false) {
 					sidebar.show();
 				}; 
@@ -179,10 +204,6 @@ function main_execute(myData, cal) {
 
 		map.fitBounds(markersCategoryLayer.getBounds());
 
-}
-
-function style_calendar(cal) {
-	return "<i class='legend-i" + " " + cal.colorcssclass + "'></i>"  + cal.name;
 }
 
 function get_marker_id(latlon) {
@@ -200,20 +221,48 @@ function get_marker_id(latlon) {
 	return newId;			
 }
 
-function format_marker_info(marker) {
+function format_events_info(events, day) {
     	
-    var startTime = DateFormat.format.date(marker.feature.properties.agenda.startTime,"D, HH:mm");
-    var endTime = DateFormat.format.date(marker.feature.properties.agenda.endTime, "D, HH:mm");
+    var info ='<ul>';
+    var timeInfo='';
+    var filteredEvents=[];
+    
+    for (var i=0; i<events.length; i++) {
+    	if (((new Date(events[i].startDate) - new Date(day)) >= 0) && (new Date(events[i].startDate) - new Date(moment(day).add('days', 1)) < 0)) {
+			filteredEvents.push(events[i]);
+		}
+	}
+	
+	for (var i=0; i<filteredEvents.length;i++) {
+		
+	    var startTime = DateFormat.format.date(filteredEvents[i].startDate,"HH:mm");
+		var endTime = DateFormat.format.date(filteredEvents[i].endDate, "HH:mm");	
+    	timeInfo = timeInfo + '&gt;' + startTime + '<br>&nbsp; ' + endTime + '&lt';
+    	descriptionInfo = '<b>' +  filteredEvents[i].title + '</b><br>' +  filteredEvents[i].description;
     	
-    var info =
-      '<table class="tg"><tr>'
-      + ' <th class="tg-0ki0">&gt;' + startTime + '<br>&nbsp; ' + endTime + '&lt;</th>'
-	  +	'<th class="tg-031e">' 
-	  + '<p><b>' +  marker.feature.properties.title + '</b><p>'
-	  + '<p>' + marker.feature.properties.description + '<p>'
-	  + '</th>'
-      + '</tr></table>';
-    	
+	    	if ((i<(filteredEvents.length-1)) 
+	    		&& ((filteredEvents[i].title != filteredEvents[i+1].title) && (filteredEvents[i].description != filteredEvents[i+1].description))) {
+					info = info +
+				      '<table class="tg"><tr>'
+				      + '<th class="tg-0ki0">'+ timeInfo + '</th>'
+					  +	'<th class="tg-031e">' + descriptionInfo + '</th>'
+				      + '</tr></table>';
+				    timeInfo='';
+	    	} else if (i==(filteredEvents.length-1)) {
+	    		info = info +
+			      '<table class="tg"><tr>'
+			      + '<th class="tg-0ki0">'+ timeInfo + '</th>'
+				  +	'<th class="tg-031e">' + descriptionInfo + '</th>'
+			      + '</tr></table>';
+			    timeInfo='';
+	    	} else {
+	    		timeInfo = timeInfo + '<br><br>';
+	    	}
+	    	
+	    }
+    
+    info = info + '</ul>';
+
 	return info;
 }
 
@@ -221,4 +270,51 @@ for (var cal in calendars) {
 	load_calendar(calendars[cal],main_execute);
 	};
 
+function showEvents(markers) {
+
+  var eventArray = [];
+  var markersArray =[];
+  var intervalStart= [];
+  
+  if (markers.length) {
+	  for (var x=0; x<markers.length; x++) {
+	  	markersArray.push(markers[x].feature);
+	  }
+  } else {
+  	markersArray.push(markers.feature);
+  }
+    
+  for (var x in calendars) {
+  	var typeMarkers = JSON.search(markersArray,"//*/*" 
+  			+ "[properties/type =\'" + calendars[x].name.replace(/\\/g,"") + "\']"           		
+			);			
+  	for (var y=0; y < typeMarkers.length; y++) {
+  		var agenda = JSON.search(typeMarkers[y],"//*/properties/agenda");
+
+  		for (var z=0; z<agenda.length; z++) {
+  			
+  			if (intervalStart.length == 0)  intervalStart = agenda[z].startTime ;
+  			if ((new Date(agenda[z].startTime) - new Date(intervalStart)) <= 0) intervalStart = agenda[z].startTime;
+  			    
+	  		eventArray.push({startDate: agenda[z].startTime, 
+	  			endDate: agenda[z].endTime,
+	  			title: typeMarkers[y].properties.title,
+	  			description: typeMarkers[y].properties.description,
+	  			type: typeMarkers[y].properties.type});
+		}
+  	};
+  }
+        
+  eventCalendars.setEvents(eventArray);
+  eventCalendars.setIntervalStart(moment(intervalStart).weekday(0));
+  eventCalendars.options.constraints.startDate = moment(intervalStart).weekday(0);
+  $('.day.event.calendar-day-'+ moment(intervalStart).format('YYYY-MM-DD')).addClass('clicked');
+  $('.event-listing').html(format_events_info(eventArray, moment(intervalStart).format('YYYY-MM-DD')));
+
+  // the order of the click handlers is predictable.
+  // direct click action callbacks come first: click, nextMonth, previoudsMonth, nextYear, previousYear, or today.
+  // then onMonthChange (if the month changed).
+  // finally onYearChange (if the year changed).
+
+}
 
