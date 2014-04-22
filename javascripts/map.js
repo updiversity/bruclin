@@ -257,7 +257,7 @@ function format_events_info(events, day) {
 			      + '</tr></table>';
 			    timeInfo='';
 	    	} else {
-	    		timeInfo = timeInfo + '<br><br>';
+	    		timeInfo = timeInfo + '<br>';
 	    	}
 	    	
 	    }
