@@ -8,7 +8,10 @@ var	calendars = [
 	 "colorcssclass": "color-red"},
 	{"id" : 'https://www.google.com/calendar/feeds/7eq4jtb1bpjppvdu1tc91v3a4c%40group.calendar.google.com/public/full?max-results=50',
 	 "name": "Eventos",
-	 "colorcssclass": "color-blue"}] ;
+	 "colorcssclass": "color-blue"},
+	 {"id" : 'https://www.google.com/calendar/feeds/6lagf1dq9g8e550h0e5qmh70ck%40group.calendar.google.com/public/full?max-results=50',
+	 "name": "Ruta Slow",
+	 "colorcssclass": "color-green"}];
 	 
 var indexLatLonArtistasBarrioMap = [
 	{"id":68 , "coordinates": [-3.73645,40.411091]},
